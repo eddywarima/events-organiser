@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Events - Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #6a11cb;
+      --secondary: #2575fc;
+      --success: #28a745;
+      --error: #dc3545;
+      --warning: #ffc107;
+      --dark: #1a1a2e;
+      --light: #f8f9fa;
+      --card-shadow: 0 10px 30px rgba(106, 17, 203, 0.1);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f9f9ff 0%, #f0f2ff 100%);
+      min-height: 100vh;
+    }
+
+    .dashboard-container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 1.5rem;
+      padding: 2rem;
+      box-shadow: var(--card-shadow);
+      opacity: 0;
+      transform: translateY(1rem);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+    }
+
+    .dashboard-container.fade-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    h1 {
+      text-align: center;
+      margin: 1.5rem 0 2.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+      background: white;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #f0f0ff;
+    }
+
+    th {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: #f9f9ff;
+    }
+
+    .event-status {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .status-pending { background: rgba(106, 17, 203, 0.1); color: var(--primary); }
+    .status-accepted { background: rgba(40, 167, 69, 0.1); color: var(--success); }
+    .status-rejected { background: rgba(220, 53, 69, 0.1); color: var(--error); }
+    .status-canceled { background: rgba(255, 193, 7, 0.1); color: var(--warning); }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .action-buttons button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      color: white;
+      font-weight: 500;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .accept-btn {
+      background: linear-gradient(to right, var(--success), #1e7e34);
+    }
+
+    .reject-btn {
+      background: linear-gradient(to right, var(--error), #c82333);
+    }
+
+    .cancel-btn {
+      background: linear-gradient(to right, var(--warning), #e0a800);
+    }
+
+    .action-buttons button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-buttons button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      filter: grayscale(0.5);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .dashboard-container {
+        width: 100%;
+        padding: 1.5rem;
+        border-radius: 1rem;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container" id="dashboard-container">
+    <h1>Manage Events</h1>
+    <table id="events-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Event Name</th>
+          <th>User</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dynamic content will be inserted here -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // DOM Elements
+    const eventsTable = document.querySelector('#events-table tbody');
+    const dashboardContainer = document.getElementById('dashboard-container');
+    
+    // Initialize dashboard
+    window.addEventListener('DOMContentLoaded', () => {
+        dashboardContainer.classList.add('fade-in');
+        fetchEvents();
+    });
+    
+    /**
+     * Fetch all events from the server
+     */
+    const fetchEvents = async () => {
+        try {
+            // Show loading state
+            eventsTable.innerHTML = `<tr><td colspan="6" class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading events...</td></tr>`;
+            
+            const response = await fetch('../backend/manage_events.php?action=fetch_events');
+            
+            // Check for HTTP errors
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status} ${response.statusText}`);
+            }
+            
+            // Verify response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                throw new Error(`Expected JSON but got: ${text.substring(0, 100)}...`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to fetch events');
+            }
+            
+            if (!data.events || !Array.isArray(data.events)) {
+                throw new Error('Invalid events data format');
+            }
+            
+            renderEvents(data.events);
+            
+        } catch (error) {
+            console.error('Fetch events error:', error);
+            showAlert(`Error: ${error.message}`, 'error');
+            eventsTable.innerHTML = `
+                <tr>
+                    <td colspan="6" class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i> ${error.message}
+                        <button onclick="fetchEvents()" class="retry-btn">
+                            <i class="fas fa-sync-alt"></i> Retry
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+    };
+    
+    /**
+     * Render events to the table
+     */
+    const renderEvents = (events) => {
+        if (events.length === 0) {
+            eventsTable.innerHTML = `<tr><td colspan="6" class="no-events">No events found</td></tr>`;
+            return;
+        }
+        
+        eventsTable.innerHTML = '';
+        
+        events.forEach(event => {
+            const row = document.createElement('tr');
+            row.dataset.eventId = event.id;
+            row.innerHTML = `
+                <td>${event.id}</td>
+                <td>${event.event_type || 'No type specified'}</td>
+                <td>${event.user_name || `User #${event.user_id}`}</td>
+                <td>${formatDate(event.event_date)}</td>
+                <td><span class="event-status status-${event.status}">${event.status}</span></td>
+                <td>
+                    <div class="action-buttons">
+                        ${getActionButtons(event.status, event.id)}
+                    </div>
+                </td>
+            `;
+            eventsTable.appendChild(row);
+        });
+    };
+    
+    /**
+     * Generate action buttons based on current status
+     */
+    function getActionButtons(currentStatus, eventId) {
+        const buttons = {
+            pending: [
+                { action: 'accept', label: 'Accept', icon: 'check', class: 'accept-btn' },
+                { action: 'reject', label: 'Reject', icon: 'times', class: 'reject-btn' }
+            ],
+            accepted: [
+                { action: 'cancel', label: 'Cancel', icon: 'ban', class: 'cancel-btn' }
+            ],
+            rejected: [],
+            canceled: []
+        };
+        
+        return buttons[currentStatus]?.map(btn => `
+            <button 
+                onclick="handleStatusChange(${eventId}, '${btn.action}', this)"
+                class="${btn.class}"
+                data-action="${btn.action}">
+                <i class="fas fa-${btn.icon}"></i> ${btn.label}
+            </button>
+        `).join('') || 'No actions available';
+    }
+    
+    /**
+     * Handle status change request
+     */
+    const handleStatusChange = async (eventId, action, button) => {
+        const statusMap = {
+            accept: 'accepted',
+            reject: 'rejected',
+            cancel: 'canceled'
+        };
+        const status = statusMap[action];
+        const actionText = action === 'accept' ? 'accept' : action === 'reject' ? 'reject' : 'cancel';
+        
+        if (!confirm(`Are you sure you want to ${actionText} this event?`)) return;
+        
+        try {
+            // Set loading state
+            button.disabled = true;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
+            
+            const response = await fetch('../backend/manage_events.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=update_status&eventId=${eventId}&status=${status}`
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Status update failed');
+            }
+            
+            // Update UI
+            const row = button.closest('tr');
+            const statusBadge = row.querySelector('.event-status');
+            
+            // Update status display
+            statusBadge.className = `event-status status-${status}`;
+            statusBadge.textContent = status;
+            
+            // Update action buttons
+            const actionContainer = row.querySelector('.action-buttons');
+            actionContainer.innerHTML = getActionButtons(status, eventId);
+            
+            // Show notification
+            showAlert(
+                `Event ${status} successfully${data.emailSent ? '' : ' (email not sent)'}`,
+                data.emailSent ? 'success' : 'warning'
+            );
+            
+        } catch (error) {
+            console.error('Status update error:', error);
+            button.disabled = false;
+            button.innerHTML = originalHTML;
+            showAlert(`Error: ${error.message}`, 'error');
+        }
+    };
+    
+    /**
+     * Format date for display
+     */
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    }
+    
+    /**
+     * Show alert notification
+     */
+    function showAlert(message, type = 'info') {
+        // Remove existing alerts of same type
+        document.querySelectorAll(`.alert.alert-${type}`).forEach(el => el.remove());
+        
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type}`;
+        alert.innerHTML = `
+            <div class="alert-content">
+                <i class="fas ${getAlertIcon(type)}"></i>
+                <span>${message}</span>
+            </div>
+            <button class="alert-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            alert.classList.add('fade-out');
+            setTimeout(() => alert.remove(), 300);
+        }, 5000);
+    }
+    
+    function getAlertIcon(type) {
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+        return icons[type] || 'fa-info-circle';
+    }
+    
+    // Add CSS for alerts and states
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            /* Loading and error states */
+            .loading-state, .error-state, .no-events {
+                text-align: center;
+                padding: 20px;
+                color: #6c757d;
+            }
+            .loading-state i {
+                margin-right: 8px;
+            }
+            .error-state {
+                color: #dc3545;
+            }
+            .retry-btn {
+                margin-top: 10px;
+                padding: 5px 15px;
+                background: #6a11cb;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            .retry-btn:hover {
+                background: #2575fc;
+            }
+            
+            /* Alert notifications */
+            .alert {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 15px;
+                max-width: 400px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                transform: translateX(0);
+                transition: all 0.3s ease;
+            }
+            .alert-content {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .alert-close {
+                background: none;
+                border: none;
+                color: inherit;
+                cursor: pointer;
+                opacity: 0.7;
+            }
+            .alert-close:hover {
+                opacity: 1;
+            }
+            .alert-success {
+                background: #28a745;
+                border-left: 5px solid #218838;
+            }
+            .alert-error {
+                background: #dc3545;
+                border-left: 5px solid #c82333;
+            }
+            .alert-warning {
+                background: #ffc107;
+                color: #212529;
+                border-left: 5px solid #e0a800;
+            }
+            .alert-info {
+                background: #17a2b8;
+                border-left: 5px solid #138496;
+            }
+            .fade-out {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            
+            @keyframes slideIn {
+                from { transform: translateX(100%); }
+                to { transform: translateX(0); }
+            }
+        </style>
+    `);
+    </script>
+    </body>
+    </html>

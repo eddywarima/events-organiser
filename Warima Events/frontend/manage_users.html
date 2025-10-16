@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warima Events - Manage Users</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #6a11cb;
+      --secondary: #2575fc;
+      --success: #28a745;
+      --error: #dc3545;
+      --warning: #ff9800;
+      --dark: #1a1a2e;
+      --light: #f8f9fa;
+      --card-shadow: 0 10px 30px rgba(106, 17, 203, 0.1);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f9f9ff 0%, #f0f2ff 100%);
+      min-height: 100vh;
+    }
+
+    .dashboard-container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 1.5rem;
+      padding: 2rem;
+      box-shadow: var(--card-shadow);
+      opacity: 0;
+      transform: translateY(1rem);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+    }
+
+    .dashboard-container.fade-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    h1 {
+      text-align: center;
+      margin: 1.5rem 0 2.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+      background: white;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #f0f0ff;
+    }
+
+    th {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: #f9f9ff;
+    }
+
+    .user-status {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .status-active { background: rgba(40, 167, 69, 0.1); color: var(--success); }
+    .status-suspended { background: rgba(255, 152, 0, 0.1); color: var(--warning); }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .action-buttons button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      color: white;
+      font-weight: 500;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .suspend-btn {
+      background: linear-gradient(to right, var(--warning), #ff6f00);
+    }
+
+    .delete-btn {
+      background: linear-gradient(to right, var(--error), #c82333);
+    }
+
+    .action-buttons button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .error-message {
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      background: rgba(220, 53, 69, 0.1);
+      color: var(--error);
+      border-left: 4px solid var(--error);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .error-message i {
+      font-size: 1.2rem;
+    }
+
+    .suspended {
+      background-color: #fffaf3;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .dashboard-container {
+        width: 100%;
+        padding: 1.5rem;
+        border-radius: 1rem;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container" id="dashboard-container">
+    <h1>Manage Users</h1>
+    <div id="error-message" class="error-message" style="display: none;">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span class="message"></span>
+    </div>
+    <table id="users-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Users will be populated dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <!DOCTYPE html>
+<html lang="en">
+  <!DOCTYPE html>
+<html lang="en">
+
+
+  <script>
+    const dashboardContainer = document.getElementById('dashboard-container');
+    const errorMessage = document.getElementById('error-message');
+
+    const animateOnLoad = () => {
+      dashboardContainer.classList.add('fade-in');
+    };
+
+    // Show error message
+    const showError = (message) => {
+      errorMessage.querySelector('.message').textContent = message;
+      errorMessage.style.display = 'flex';
+    };
+
+    // Hide error message
+    const hideError = () => {
+      errorMessage.style.display = 'none';
+    };
+
+    // Fetch users from the database
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('../backend/manage_users.php?action=fetch');
+        
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status} status`);
+        }
+
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.message || 'Failed to fetch users');
+        }
+
+        hideError();
+        
+        const usersTableBody = document.querySelector('#users-table tbody');
+        usersTableBody.innerHTML = '';
+
+        if (!data.users || data.users.length === 0) {
+          usersTableBody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center;">No users found</td>
+            </tr>
+          `;
+          return;
+        }
+
+        data.users.forEach(user => {
+          const isSuspended = user.suspended_until && new Date(user.suspended_until) > new Date();
+          const isAdmin = user.role === 'admin';
+          const row = document.createElement('tr');
+          
+          if (isSuspended) row.classList.add('suspended');
+          if (isAdmin) row.classList.add('admin-account');
+          
+          row.innerHTML = `
+            <td>${user.id || 'N/A'}</td>
+            <td>${user.name || 'N/A'}</td>
+            <td>${user.email || 'N/A'}</td>
+            <td>${user.role || 'N/A'}</td>
+            <td>
+              <span class="user-status status-${isSuspended ? 'suspended' : 'active'}">
+                ${isSuspended ? 'Suspended until ' + new Date(user.suspended_until).toLocaleString() : 'Active'}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                ${isAdmin ? `
+                  <button class="admin-btn" disabled title="Admin accounts cannot be modified">
+                    <i class="fas fa-shield-alt"></i> Admin Protected
+                  </button>
+                ` : `
+                  <button class="suspend-btn" data-user-id="${user.id}" data-is-suspended="${isSuspended}">
+                    <i class="fas ${isSuspended ? 'fa-unlock' : 'fa-lock'}"></i>
+                    ${isSuspended ? 'Unsuspend' : 'Suspend'}
+                  </button>
+                  <button class="delete-btn" data-user-id="${user.id}">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                `}
+              </div>
+            </td>
+          `;
+          usersTableBody.appendChild(row);
+        });
+
+        // Add event listeners only for non-admin users
+        document.querySelectorAll('.suspend-btn').forEach(btn => {
+          btn.addEventListener('click', suspendUserHandler);
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', deleteUserHandler);
+        });
+
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        showError(error.message);
+        
+        const usersTableBody = document.querySelector('#users-table tbody');
+        usersTableBody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--error);">
+              <i class="fas fa-exclamation-circle"></i> Failed to load user data
+            </td>
+          </tr>
+        `;
+      }
+    };
+
+    // Suspend/unsuspend user handler
+    const suspendUserHandler = async (event) => {
+      const btn = event.currentTarget;
+      const userId = btn.getAttribute('data-user-id');
+      const isSuspended = btn.getAttribute('data-is-suspended') === 'true';
+
+      const action = isSuspended ? 'unsuspend' : 'suspend';
+      const confirmMessage = isSuspended
+        ? `Unsuspend User ID ${userId}?`
+        : `Suspend User ID ${userId} for 30 minutes?`;
+
+      if (!confirm(confirmMessage)) return;
+
+      try {
+        const response = await fetch('../backend/manage_users.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: action,
+            user_id: userId
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || `${action} operation failed`);
+        }
+
+        fetchUsers(); // Refresh the user list
+      } catch (error) {
+        console.error(`Error ${action}ing user:`, error);
+        showError(`Failed to ${action} user: ${error.message}`);
+      }
+    };
+
+    // Delete user handler
+    const deleteUserHandler = async (event) => {
+      const userId = event.currentTarget.getAttribute('data-user-id');
+
+      if (!confirm(`Permanently delete User ID ${userId}? This cannot be undone.`)) return;
+
+      try {
+        const response = await fetch('../backend/manage_users.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'delete',
+            user_id: userId
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Delete operation failed');
+        }
+
+        fetchUsers(); // Refresh the user list
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        showError(`Failed to delete user: ${error.message}`);
+      }
+    };
+
+    window.addEventListener('load', () => {
+      animateOnLoad();
+      fetchUsers();
+    });
+  </script>
+
+  <style>
+    /* Add this to your existing styles */
+    .admin-account {
+      background-color: rgba(106, 17, 203, 0.05);
+    }
+    
+    .admin-account td {
+      color: #666;
+    }
+    
+    .admin-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.75rem;
+      background: #f0f0f0;
+      color: #666;
+      cursor: not-allowed;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .admin-btn i {
+      color: var(--primary);
+    }
+  </style>
+</body>
+</html>
