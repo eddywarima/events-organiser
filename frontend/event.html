@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #007bff, #ffffff); min-height: 100vh; color: #333; }
+        .card { background-color: rgba(255, 255, 255, 0.9); border: 2px solid #007bff; }
+        .btn-primary { background-color: #007bff; border-color: #007bff; }
+        .btn-primary:hover { background-color: #0056b3; border-color: #0056b3; }
+        .text-amber { color: #FFBF00; }
+        .form-label { color: #FFBF00; font-weight: bold; }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-center text-amber" id="title"></h2>
+                        <p class="card-text" id="description"></p>
+                        <p class="card-text"><strong>Location:</strong> <span id="location"></span></p>
+                        <p class="card-text"><strong>Date & Time:</strong> <span id="datetime"></span></p>
+                        <p class="card-text"><strong>Available Tickets:</strong> <span id="tickets"></span></p>
+                        <p class="card-text"><strong>Price:</strong> $<span id="price"></span></p>
+
+                        <h3 class="text-center text-amber mt-4">Book Tickets</h3>
+                        <div id="login-required" class="alert alert-info text-center" style="display: none;">
+                            Please <a href="login.html">login</a> to book tickets.
+                        </div>
+                        <form id="bookingForm" action="http://localhost/event%20booking/backend/bookings/book-ticket.php" method="POST">
+                            <input type="hidden" name="event_id" id="event_id">
+                            <div class="mb-3">
+                                <label for="tickets_input" class="form-label">Number of Tickets</label>
+                                <input type="number" class="form-control" name="tickets" id="tickets_input" value="1" min="1" required>
+                                <div class="form-text" id="price-display">Total: $<span id="total-price">0.00</span></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Book Now</button>
+                        </form>
+
+                        <div class="text-center mt-3">
+                            <a href="index.html" class="btn btn-secondary">Back to Events</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('id');
+
+        if (!eventId) {
+            document.querySelector('.card-body').innerHTML = '<p class="text-center text-danger">No event ID provided.</p>';
+        } else {
+            fetch(`http://localhost/event%20booking/backend/events/fetch-event.php?id=${eventId}`)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                })
+                .then(event => {
+                    if (event.error) {
+                        throw new Error(event.error);
+                    }
+
+                    // Add image if exists
+                    const cardBody = document.querySelector('.card-body');
+                    if (event.image) {
+                        const img = document.createElement('img');
+                        img.src = `http://localhost/event%20booking/backend/${event.image}`;
+                        img.className = 'card-img-top mb-3';
+                        img.alt = event.title;
+                        img.style.maxHeight = '300px';
+                        img.style.objectFit = 'cover';
+                        cardBody.insertBefore(img, cardBody.firstChild);
+                    }
+
+                    document.getElementById('event_id').value = event.id;
+                    document.getElementById('title').innerText = event.title;
+                    document.getElementById('description').innerText = event.description;
+                    document.getElementById('location').innerText = event.location;
+                    document.getElementById('datetime').innerText = event.event_date + ' ' + event.event_time;
+                    document.getElementById('tickets').innerText = event.available_tickets;
+                    document.getElementById('price').innerText = event.ticket_price;
+
+                    // Set max tickets to available tickets
+                    document.getElementById('tickets_input').max = event.available_tickets;
+
+                    // Update price display
+                    const updatePrice = () => {
+                        const input = document.getElementById('tickets_input');
+                        const tickets = parseInt(input.value) || 0;
+                        const maxTickets = parseInt(input.max);
+
+                        // Validate ticket count
+                        if (tickets > maxTickets) {
+                            input.value = maxTickets;
+                            alert(`Maximum ${maxTickets} tickets available for this event.`);
+                            return;
+                        }
+
+                        const total = tickets * parseFloat(event.ticket_price);
+                        document.getElementById('total-price').innerText = total.toFixed(2);
+                    };
+
+                    document.getElementById('tickets_input').addEventListener('input', updatePrice);
+                    document.getElementById('tickets_input').addEventListener('change', updatePrice);
+                    updatePrice(); // Initial calculation
+
+                    // Check if user is logged in
+                    fetch('http://localhost/event%20booking/backend/auth/check_login.php')
+                        .then(res => res.json())
+                        .then(loginData => {
+                            if (!loginData.logged_in) {
+                                document.getElementById('login-required').style.display = 'block';
+                                document.getElementById('bookingForm').style.display = 'none';
+                            } else {
+                                // Show message if no tickets available
+                                if (event.available_tickets <= 0) {
+                                    document.getElementById('bookingForm').innerHTML = '<div class="alert alert-warning text-center">Sorry, this event is sold out!</div>';
+                                }
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error checking login status:', err);
+                        });
+                })
+                .catch(err => {
+                    console.error('Error fetching event:', err);
+                    document.querySelector('.card-body').innerHTML = '<div class="alert alert-danger text-center">Error loading event details: ' + err.message + '<br><a href="index.html" class="btn btn-secondary mt-3">Back to Events</a></div>';
+                });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        fetch('http://localhost/event%20booking/backend/auth/check_role.php?expected=admin')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.ok) {
+                    window.location.href = 'dashboard.html';
+                }
+            });
+    </script>
+    <style>
+        body { background: linear-gradient(135deg, #007bff, #ffffff); min-height: 100vh; color: #333; }
+        .card { background-color: rgba(255, 255, 255, 0.9); border: 2px solid #007bff; }
+        .btn-primary { background-color: #007bff; border-color: #007bff; }
+        .btn-primary:hover { background-color: #0056b3; border-color: #0056b3; }
+        .text-amber { color: #FFBF00; }
+        .list-group-item { background-color: rgba(255, 255, 255, 0.8); }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-center text-amber">Welcome Admin</h2>
+
+                        <div class="list-group mb-4">
+                            <a href="admin-add-event.html" class="list-group-item list-group-item-action">Add Event</a>
+                            <a href="http://localhost/event%20booking/backend/admin/view-bookings.php" class="list-group-item list-group-item-action">View Bookings</a>
+                            <a href="http://localhost/event%20booking/backend/auth/logout.php" class="list-group-item list-group-item-action">Logout</a>
+                        </div>
+
+                        <h3 class="text-center text-amber">Events List</h3>
+                        <div id="events-list" class="row">
+                            <!-- Events will be loaded here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        fetch('http://localhost/event%20booking/backend/events/fetch-events.php')
+            .then(res => res.json())
+            .then(events => {
+                const container = document.getElementById('events-list');
+                if (events.length === 0) {
+                    container.innerHTML = '<div class="col-12"><p class="text-center text-muted">No events found</p></div>';
+                } else {
+                    events.forEach(event => {
+                        const col = document.createElement('div');
+                        col.className = 'col-md-6 mb-3';
+                        col.innerHTML = `
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">${event.title}</h5>
+                                    <p class="card-text">${event.description}</p>
+                                    <p class="card-text"><small class="text-muted">${event.location} | ${event.event_date} ${event.event_time}</small></p>
+                                    <p class="card-text">Tickets: ${event.available_tickets}/${event.total_tickets} | Price: $${event.ticket_price}</p>
+                                    <a href="admin-edit-event.html?id=${event.id}" class="btn btn-warning btn-sm">Edit</a>
+                                    <a href="http://localhost/event%20booking/backend/events/delete-event.php?id=${event.id}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this event?')">Delete</a>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(col);
+                    });
+                }
+            })
+            .catch(err => {
+                document.getElementById('events-list').innerHTML = '<div class="col-12"><p class="text-center text-danger">Error loading events.</p></div>';
+            });
+    </script>
+</body>
+
+</html>

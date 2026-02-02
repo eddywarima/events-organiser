@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Event</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #007bff, #ffffff); min-height: 100vh; color: #333; }
+        .card { background-color: rgba(255, 255, 255, 0.9); border: 2px solid #007bff; }
+        .btn-primary { background-color: #007bff; border-color: #007bff; }
+        .btn-primary:hover { background-color: #0056b3; border-color: #0056b3; }
+        .text-amber { color: #FFBF00; }
+        .form-label { color: #FFBF00; font-weight: bold; }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-center text-amber">Add New Event</h2>
+
+                        <form action="http://localhost/event%20booking/backend/events/create-event.php" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title</label>
+                                <input type="text" class="form-control" name="title" id="title" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" name="description" id="description" rows="3" required></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="location" class="form-label">Location</label>
+                                <input type="text" class="form-control" name="location" id="location" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="event_date" class="form-label">Date</label>
+                                <input type="date" class="form-control" name="event_date" id="event_date" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="event_time" class="form-label">Time</label>
+                                <input type="time" class="form-control" name="event_time" id="event_time" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="total_tickets" class="form-label">Total Tickets</label>
+                                <input type="number" class="form-control" name="total_tickets" id="total_tickets" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="ticket_price" class="form-label">Ticket Price</label>
+                                <input type="number" class="form-control" name="ticket_price" id="ticket_price" step="0.01" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="image" class="form-label">Image</label>
+                                <input type="file" class="form-control" name="image" id="image">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Create Event</button>
+                        </form>
+
+                        <div class="text-center mt-3">
+                            <a href="admin-dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</body>
+
+</html>

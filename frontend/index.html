@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Booking - Discover Amazing Events</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #007bff, #ffffff);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.9), rgba(255, 191, 0, 0.1));
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+            border-radius: 0 0 50px 50px;
+        }
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        .event-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            height: 100%;
+        }
+        .event-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        .event-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .event-card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+        .card-title {
+            color: #007bff;
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        .card-text {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .event-meta {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .event-meta i {
+            color: #ffbf00;
+            margin-right: 0.5rem;
+            width: 16px;
+        }
+        .price-badge {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        .tickets-available {
+            background: #28a745;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .tickets-low {
+            background: #ffc107;
+            color: #000;
+        }
+        .tickets-sold-out {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+            background: linear-gradient(45deg, #0056b3, #004085);
+        }
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        .search-section {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 3rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .footer {
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            .event-card {
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-calendar-alt me-2"></i>
+                EventBooking
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="register.html">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="hero-title">Discover Amazing Events</h1>
+            <p class="hero-subtitle">Book tickets for concerts, shows, and exclusive experiences near you</p>
+            <a href="#events" class="btn btn-light btn-lg">
+                <i class="fas fa-search me-2"></i>Browse Events
+            </a>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <div class="container">
+        <div class="search-section">
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <h3 class="text-center mb-4">
+                        <i class="fas fa-search me-2"></i>Find Your Perfect Event
+                    </h3>
+                    <div class="input-group mb-3">
+                        <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="Search events by name, location, or description...">
+                        <button class="btn btn-primary" type="button" id="searchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="text-center">
+                        <span class="badge bg-secondary me-2">Popular: Concert</span>
+                        <span class="badge bg-secondary me-2">Theater</span>
+                        <span class="badge bg-secondary me-2">Sports</span>
+                        <span class="badge bg-secondary">Festival</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Section -->
+    <div class="container" id="events">
+        <div class="text-center mb-5">
+            <h2 class="text-white">
+                <i class="fas fa-calendar-check me-2"></i>Upcoming Events
+            </h2>
+            <p class="text-white-50">Don't miss out on these exciting events</p>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div id="events-container" class="row" style="display: none;"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>EventBooking</h5>
+                    <p>Your gateway to unforgettable experiences</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="login.html" class="text-white">Login</a></li>
+                        <li><a href="register.html" class="text-white">Register</a></li>
+                        <li><a href="#" class="text-white">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Follow Us</h5>
+                    <div>
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <p>&copy; 2026 EventBooking. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let allEvents = [];
+
+        // Show loading spinner
+        function showLoading() {
+            document.getElementById('loading-spinner').style.display = 'flex';
+            document.getElementById('events-container').style.display = 'none';
+        }
+
+        // Hide loading spinner
+        function hideLoading() {
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('events-container').style.display = 'block';
+        }
+
+        // Render events
+        function renderEvents(events) {
+            const container = document.getElementById('events-container');
+            container.innerHTML = '';
+
+            if (events.length === 0) {
+                container.innerHTML = "<div class='col-12'><div class='alert alert-info text-center'><i class='fas fa-info-circle me-2'></i>No events found matching your search.</div></div>";
+                return;
+            }
+
+            events.forEach(event => {
+                const col = document.createElement('div');
+                col.className = 'col-lg-4 col-md-6';
+
+                // Determine ticket availability class
+                let ticketClass = 'tickets-available';
+                let ticketText = `${event.available_tickets} Available`;
+                if (event.available_tickets === 0) {
+                    ticketClass = 'tickets-sold-out';
+                    ticketText = 'Sold Out';
+                } else if (event.available_tickets < 10) {
+                    ticketClass = 'tickets-low';
+                    ticketText = `Only ${event.available_tickets} Left!`;
+                }
+
+                col.innerHTML = `
+                    <div class="card event-card">
+                        ${event.image ? `<img src="http://localhost/event%20booking/backend/${event.image}" class="card-img-top" alt="${event.title}">` :
+                          `<div class="card-img-top bg-primary d-flex align-items-center justify-content-center text-white" style="height: 200px;">
+                            <i class="fas fa-calendar-alt fa-3x"></i>
+                          </div>`}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${event.title}</h5>
+                            <p class="card-text flex-grow-1">${event.description.length > 100 ? event.description.substring(0, 100) + '...' : event.description}</p>
+
+                            <div class="event-meta">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${event.location}</span>
+                            </div>
+
+                            <div class="event-meta">
+                                <i class="fas fa-clock"></i>
+                                <span>${new Date(event.event_date + ' ' + event.event_time).toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="price-badge">$${event.ticket_price}</span>
+                                <span class="${ticketClass}">${ticketText}</span>
+                            </div>
+
+                            <a href="event.html?id=${event.id}" class="btn btn-primary mt-3 ${event.available_tickets === 0 ? 'disabled' : ''}">
+                                <i class="fas fa-ticket-alt me-2"></i>
+                                ${event.available_tickets === 0 ? 'Sold Out' : 'View & Book'}
+                            </a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(col);
+            });
+        }
+
+        // Search functionality
+        function filterEvents(searchTerm) {
+            if (!searchTerm) {
+                renderEvents(allEvents);
+                return;
+            }
+
+            const filtered = allEvents.filter(event =>
+                event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                event.location.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            renderEvents(filtered);
+        }
+
+        // Load events
+        showLoading();
+        fetch('http://localhost/event%20booking/backend/events/fetch-events.php')
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(events => {
+                allEvents = events;
+                hideLoading();
+                renderEvents(events);
+            })
+            .catch(err => {
+                console.error('Error loading events:', err);
+                hideLoading();
+                document.getElementById('events-container').innerHTML = "<div class='col-12'><div class='alert alert-danger text-center'><i class='fas fa-exclamation-triangle me-2'></i>Error loading events: " + err.message + "</div></div>";
+            });
+
+        // Search event listeners
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            filterEvents(e.target.value);
+        });
+
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const searchTerm = document.getElementById('searchInput').value;
+            filterEvents(searchTerm);
+        });
+
+        // Smooth scroll to events section
+        document.querySelector('a[href="#events"]').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('events').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+
+</html>
