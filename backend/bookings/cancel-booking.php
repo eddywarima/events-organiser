@@ -1,6 +1,10 @@
 <?php
 require_once "../auth/auth_check.php";
 require_once "../config/db.php";
+require_once "../utils/csrf.php";
+
+// Validate CSRF token
+CSRFProtection::validateRequest();
 
 $user_id = $_SESSION['user_id'];
 $booking_id = intval($_POST['id']);

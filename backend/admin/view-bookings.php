@@ -67,7 +67,7 @@ $result = $conn->query("
                                             <td><?= htmlspecialchars($row['email']) ?></td>
                                             <td><?= htmlspecialchars($row['title']) ?></td>
                                             <td><?= htmlspecialchars($row['tickets']) ?></td>
-                                            <td>$<?= htmlspecialchars($row['total_amount']) ?></td>
+                                            <td>KSh<?= htmlspecialchars($row['total_amount']) ?></td>
                                             <td>
                                                 <?php
                                                 $status = htmlspecialchars($row['booking_status']);

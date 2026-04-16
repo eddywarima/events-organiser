@@ -42,7 +42,7 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
         die("Image too large. Max 1MB.");
     }
     $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-    $image_path = "../uploads/events/" . time() . "." . $ext;
+    $image_path = "uploads/events/" . time() . "." . $ext;
     move_uploaded_file($_FILES['image']['tmp_name'], $image_path);
 }
 

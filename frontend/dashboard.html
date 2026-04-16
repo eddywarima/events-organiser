@@ -6,6 +6,32 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Fetch CSRF token function
+        function fetchCSRFToken() {
+            return fetch('http://localhost/event%20booking/backend/utils/csrf_token.php')
+                .then(response => response.json())
+                .then(data => data.csrf_token);
+        }
+        
+        // Show notifications
+        function showNotification(message, type = 'warning') {
+            const container = document.getElementById('notification-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            container.appendChild(alert);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+        
         fetch('http://localhost/event%20booking/backend/auth/check_role.php?expected=user')
             .then(res => res.json())
             .then(data => {
@@ -14,21 +40,108 @@
                 }
             });
     </script>
+
     <style>
-        body { background-color: #f8f9fa; }
-        h2 { color: #ffbf00; text-align: center; margin-top: 20px; }
-        .table { border-radius: 10px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .btn-danger { background-color: #dc3545; border-color: #dc3545; }
-        .btn-danger:hover { background-color: #c82333; }
+        body {
+            background: linear-gradient(to right, #e3f2fd, #f0f8ff);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            margin-top: 50px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 123, 255, 0.15);
+        }
+
+        h2 {
+            color: #0d6efd;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-radius: 8px;
+        }
+
+        .btn-danger {
+            border-radius: 8px;
+        }
+
+        .table {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.1);
+        }
+
+        .table thead {
+            background-color: #cfe2ff;
+            color: #0d6efd;
+        }
+
+        .table th {
+            font-weight: 600;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f1f7ff;
+        }
+
+        .table tbody tr:hover {
+            background-color: #e2efff;
+            transition: 0.3s ease;
+        }
+
+        .badge {
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .text-center a.btn-secondary {
+            margin-top: 10px;
+            padding: 8px 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h2>My Bookings</h2>
+        <!-- Check for email notification -->
+        <div id="notification-container"></div>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>My Bookings</h2>
+            <a href="profile.html" class="btn btn-primary btn-sm">
+                <i class="fas fa-user me-2"></i>My Profile
+            </a>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-striped table-bordered">
-                <thead class="table-warning">
+                <thead>
                     <tr>
                         <th>Event</th>
                         <th>Tickets</th>
@@ -41,36 +154,95 @@
                 <tbody id="bookingsTable"></tbody>
             </table>
         </div>
-        <div class="text-center mt-3">
+
+        <div class="text-center mt-4">
             <a href="http://localhost/event%20booking/backend/auth/logout.php" class="btn btn-secondary">Logout</a>
         </div>
     </div>
 
     <script>
-        fetch('http://localhost/event%20booking/backend/bookings/user-bookings.php')
-            .then(res => res.json())
-            .then(bookings => {
-                const tbody = document.getElementById('bookingsTable');
-                if (bookings.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No bookings found.</td></tr>';
-                    return;
-                }
-                bookings.forEach(b => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${b.title}</td>
-                        <td>${b.tickets}</td>
-                        <td>$${b.total_amount}</td>
-                        <td><span class="badge bg-${b.booking_status === 'confirmed' ? 'success' : 'secondary'}">${b.booking_status}</span></td>
-                        <td>${b.booking_date}</td>
-                        <td>${b.booking_status === 'confirmed' ? `<form method='POST' action='http://localhost/event%20booking/backend/bookings/cancel-booking.php' style='display:inline;'><input type='hidden' name='id' value='${b.id}'><button type='submit' class='btn btn-danger btn-sm' onclick="return confirm('Cancel this booking?')">Cancel</button></form>` : ''}</td>
-                    `;
-                    tbody.appendChild(row);
+        // Fetch CSRF token for cancel buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('http://localhost/event%20booking/backend/utils/csrf_token.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.csrf_token) {
+                        // Set CSRF tokens for all cancel buttons
+                        document.querySelectorAll('[id^="csrf_token_"]').forEach(input => {
+                            input.value = data.csrf_token;
+                        });
+                    } else {
+                        console.error('No CSRF token in response');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching CSRF token:', error);
                 });
-            })
-            .catch(err => {
-                document.getElementById('bookingsTable').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading bookings.</td></tr>';
-            });
+
+            // Load bookings
+            fetch('http://localhost/event%20booking/backend/bookings/user-bookings.php')
+                .then(res => res.json())
+                .then(bookings => {
+                    const tbody = document.getElementById('bookingsTable');
+                    if (bookings.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No bookings found.</td></tr>';
+                        return;
+                    }
+                    bookings.forEach(b => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${b.title}</td>
+                            <td>${b.tickets}</td>
+                            <td>KSh${b.total_amount}</td>
+                            <td><span class="badge bg-${b.booking_status === 'confirmed' ? 'success' : 'secondary'}">${b.booking_status}</span></td>
+                            <td>${b.booking_date}</td>
+                            <td>
+                            ${b.booking_status === 'confirmed' ? `
+                                <div class="btn-group" role="group">
+                                    <a href="http://localhost/event%20booking/backend/utils/print_ticket.php?booking_id=${b.id}" 
+                                       class="btn btn-primary btn-sm" target="_blank">
+                                        <i class="fas fa-print me-1"></i>Print Ticket
+                                    </a>
+                                    <form method='POST' action='http://localhost/event%20booking/backend/bookings/cancel-booking.php' style='display:inline;' onsubmit='return confirm("Cancel this booking?")'>
+                                        <input type='hidden' name='id' value='${b.id}'>
+                                        <input type='hidden' name='csrf_token' id='csrf_token_${b.id}'>
+                                        <button type='submit' class='btn btn-danger btn-sm'>Cancel</button>
+                                    </form>
+                                </div>
+                            ` : '<span class="text-muted">No actions available</span>'}
+                        </td>
+                        `;
+                        tbody.appendChild(row);
+
+                        // Fetch CSRF token for each cancel form
+                        if (b.booking_status === 'confirmed') {
+                            fetchCSRFToken().then(token => {
+                                const csrfInput = document.getElementById(`csrf_token_${b.id}`);
+                                if (csrfInput) {
+                                    csrfInput.value = token;
+                                }
+                            }).catch(err => {
+                                console.error('Failed to fetch CSRF token for cancel form:', err);
+                            });
+                        }
+                    });
+
+                    // Check for email notification
+                    fetch('http://localhost/event%20booking/backend/auth/check_notifications.php')
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.email_notification) {
+                                showNotification(data.email_notification, 'warning');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error checking notifications:', err);
+                        });
+                })
+                .catch(err => {
+                    document.getElementById('bookingsTable').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading bookings.</td></tr>';
+                });
+        });
     </script>
 </body>
 

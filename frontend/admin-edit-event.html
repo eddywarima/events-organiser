@@ -26,6 +26,7 @@
 
                         <form id="editEventForm" action="http://localhost/event%20booking/backend/events/update-event.php" method="POST" enctype="multipart/form-data">
                             <input type="hidden" name="id" id="event_id">
+                            <input type="hidden" name="csrf_token" id="csrf_token">
 
                             <div class="mb-3">
                                 <label for="title" class="form-label">Title</label>
@@ -81,26 +82,42 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Fetch existing event data
+        // Fetch CSRF token and event data
         const urlParams = new URLSearchParams(window.location.search);
         const eventId = urlParams.get('id');
 
-        fetch(`http://localhost/event%20booking/backend/events/fetch-event.php?id=${eventId}`)
-            .then(res => res.json())
-            .then(event => {
-                document.getElementById('event_id').value = event.id;
-                document.getElementById('title').value = event.title;
-                document.getElementById('description').value = event.description;
-                document.getElementById('location').value = event.location;
-                document.getElementById('event_date').value = event.event_date;
-                document.getElementById('event_time').value = event.event_time;
-                document.getElementById('total_tickets').value = event.total_tickets;
-                document.getElementById('ticket_price').value = event.ticket_price;
-            })
-            .catch(err => {
-                console.error('Error fetching event:', err);
-                document.querySelector('.card-body').innerHTML = '<p class="text-center text-danger">Error loading event details.</p>';
-            });
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Fetch CSRF token first
+            try {
+                const csrfResponse = await fetch('http://localhost/event%20booking/backend/utils/csrf_token.php');
+                const csrfData = await csrfResponse.json();
+                if (csrfData.csrf_token) {
+                    document.getElementById('csrf_token').value = csrfData.csrf_token;
+                } else {
+                    console.error('No CSRF token in response');
+                }
+            } catch (error) {
+                console.error('Error fetching CSRF token:', error);
+            }
+
+            // Then fetch event data
+            fetch(`http://localhost/event%20booking/backend/events/fetch-event.php?id=${eventId}`)
+                .then(res => res.json())
+                .then(event => {
+                    document.getElementById('event_id').value = event.id;
+                    document.getElementById('title').value = event.title;
+                    document.getElementById('description').value = event.description;
+                    document.getElementById('location').value = event.location;
+                    document.getElementById('event_date').value = event.event_date;
+                    document.getElementById('event_time').value = event.event_time;
+                    document.getElementById('total_tickets').value = event.total_tickets;
+                    document.getElementById('ticket_price').value = event.ticket_price;
+                })
+                .catch(err => {
+                    console.error('Error fetching event:', err);
+                    document.querySelector('.card-body').innerHTML = '<p class="text-center text-danger">Error loading event details.</p>';
+                });
+        });
     </script>
 </body>
 

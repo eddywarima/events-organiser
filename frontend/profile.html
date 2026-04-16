@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Event Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        fetch('http://localhost/event%20booking/backend/auth/check_role.php?expected=user')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.ok) {
+                    window.location.href = 'login.html';
+                }
+            });
+    </script>
+    <style>
+        body { 
+            background: linear-gradient(135deg, #007bff, #ffffff); 
+            min-height: 100vh; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.9), rgba(255, 191, 0, 0.1));
+            color: white;
+            padding: 3rem 0;
+            border-radius: 0 0 50px 50px;
+            margin-bottom: 2rem;
+        }
+        .avatar-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 1rem;
+        }
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            object-fit: cover;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #007bff;
+        }
+        .avatar-upload {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: #007bff;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 3px solid white;
+            transition: all 0.3s ease;
+        }
+        .avatar-upload:hover {
+            background: #0056b3;
+            transform: scale(1.1);
+        }
+        .profile-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        }
+        .nav-tabs .nav-link {
+            color: #007bff;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+        }
+        .nav-tabs .nav-link.active {
+            color: #007bff;
+            background: rgba(0, 123, 255, 0.1);
+            border-bottom: 3px solid #007bff;
+        }
+        .tab-content {
+            padding: 2rem 0;
+        }
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-calendar-alt me-2"></i>
+                EventBooking
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="profile.html">
+                            <i class="fas fa-user me-1"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://localhost/event%20booking/backend/auth/logout.php">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="container text-center">
+            <div class="avatar-container">
+                <div id="avatarDisplay" class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <label for="avatarInput" class="avatar-upload">
+                    <i class="fas fa-camera"></i>
+                </label>
+                <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+            </div>
+            <h1 id="profileName" class="mb-2">Loading...</h1>
+            <p id="profileEmail" class="lead">Loading...</p>
+            <div class="mt-3">
+                <span id="memberSince" class="badge bg-light text-dark">Member since Loading...</span>
+            </div>
+            <div class="mt-3">
+                <a href="index.html" class="btn btn-primary me-2">
+                    <i class="fas fa-calendar-alt me-2"></i>Browse Events
+                </a>
+                <a href="dashboard.html" class="btn btn-outline-primary">
+                    <i class="fas fa-ticket-alt me-2"></i>My Bookings
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <!-- Stats Section -->
+            <div class="col-lg-3">
+                <div class="stats-card">
+                    <div class="stats-number" id="totalBookings">0</div>
+                    <div>Total Bookings</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-number" id="totalSpent">KSh0</div>
+                    <div>Total Spent</div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="col-lg-9">
+                <div class="profile-card">
+                    <div class="card-body p-4">
+                        <!-- Tabs -->
+                        <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-content" type="button">
+                                    <i class="fas fa-user me-2"></i>Profile Information
+                                </button>
+                            </li>
+                          
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security-content" type="button">
+                                    <i class="fas fa-lock me-2"></i>Security
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="profileTabContent">
+                            <!-- Profile Information Tab -->
+                            <div class="tab-pane fade show active" id="profile-content">
+                                <form id="profileForm">
+                                    <input type="hidden" id="csrf_token" name="csrf_token">
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="full_name" class="form-label">Full Name</label>
+                                                <input type="text" class="form-control" id="full_name" name="full_name" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="email" readonly>
+                                                <small class="form-text text-muted">Email cannot be changed</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="phone" class="form-label">Phone Number</label>
+                                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="+1 (555) 123-4567">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="date_of_birth" class="form-label">Date of Birth</label>
+                                                <input type="date" class="form-control" id="date_of_birth" name="date_of_birth">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="gender" class="form-label">Gender</label>
+                                                <select class="form-select" id="gender" name="gender">
+                                                    <option value="">Select Gender</option>
+                                                    <option value="male">Male</option>
+                                                    <option value="female">Female</option>
+                                                    <option value="other">Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Account Status</label>
+                                                <div class="form-control bg-light">
+                                                    <span class="badge bg-success">Active</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="bio" class="form-label">Bio</label>
+                                        <textarea class="form-control" id="bio" name="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+                                        <small class="form-text text-muted">Maximum 500 characters</small>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between">
+                                        <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+                                            <i class="fas fa-save me-2"></i>Save Changes
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" id="cancelBtn">
+                                            <i class="fas fa-times me-2"></i>Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Preferences Tab -->
+                            <div class="tab-pane fade" id="preferences-content">
+                                <form id="preferencesForm">
+                                    <h5 class="mb-4">Notification Preferences</h5>
+                                    
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="email_notifications" name="preferences[email_notifications]">
+                                            <label class="form-check-label" for="email_notifications">
+                                                Email Notifications
+                                                <small class="d-block text-muted">Receive booking confirmations and updates via email</small>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="booking_reminders" name="preferences[booking_reminders]">
+                                            <label class="form-check-label" for="booking_reminders">
+                                                Booking Reminders
+                                                <small class="d-block text-muted">Get reminders before your events</small>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="marketing_emails" name="preferences[marketing_emails]">
+                                            <label class="form-check-label" for="marketing_emails">
+                                                Marketing Emails
+                                                <small class="d-block text-muted">Receive promotional offers and event recommendations</small>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Save Preferences
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Security Tab -->
+                            <div class="tab-pane fade" id="security-content">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5 class="mb-4">Change Password</h5>
+                                        <form id="passwordForm">
+                                            <div class="mb-3">
+                                                <label for="current_password" class="form-label">Current Password</label>
+                                                <input type="password" class="form-control" id="current_password" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="new_password" class="form-label">New Password</label>
+                                                <input type="password" class="form-control" id="new_password" required>
+                                                <small class="form-text text-muted">Must be at least 8 characters with uppercase, lowercase, and numbers</small>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                                <input type="password" class="form-control" id="confirm_password" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-lock me-2"></i>Change Password
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5 class="mb-4">Account Security</h5>
+                                        <div class="alert alert-info">
+                                            <h6><i class="fas fa-info-circle me-2"></i>Security Tips</h6>
+                                            <ul class="mb-0">
+                                                <li>Use a strong, unique password</li>
+                                                <li>Never share your password with anyone</li>
+                                                <li>Log out after using public computers</li>
+                                                <li>Keep your contact information updated</li>
+                                            </ul>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-outline-primary" onclick="window.location.href='forgot-password.html'">
+                                                <i class="fas fa-key me-2"></i>Forgot Password?
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let profileData = null;
+        let originalFormData = {};
+
+        // Load profile data
+        function loadProfile() {
+            showLoading();
+            
+            fetch('http://localhost/event%20booking/backend/users/get-profile.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        profileData = data.profile;
+                        populateProfile(data.profile);
+                        hideLoading();
+                    } else {
+                        showError('Failed to load profile data');
+                        hideLoading();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading profile:', error);
+                    showError('Error loading profile data');
+                    hideLoading();
+                });
+        }
+
+        // Populate profile form
+        function populateProfile(profile) {
+            // Update header
+            document.getElementById('profileName').textContent = profile.full_name;
+            document.getElementById('profileEmail').textContent = profile.email;
+            document.getElementById('memberSince').textContent = 'Member since ' + new Date(profile.created_at).getFullYear();
+            
+            // Update stats
+            document.getElementById('totalBookings').textContent = profile.total_bookings || 0;
+            document.getElementById('totalSpent').textContent = 'ksh' + (profile.total_spent || 0).toFixed(2);
+            
+            // Update avatar
+            if (profile.avatar) {
+                document.getElementById('avatarDisplay').innerHTML = `<img src="http://localhost/event%20booking/backend/${profile.avatar}" alt="Avatar" class="avatar">`;
+            }
+            
+            // Update form fields
+            document.getElementById('full_name').value = profile.full_name || '';
+            document.getElementById('email').value = profile.email || '';
+            
+            // Store original form data
+            originalFormData = getFormData();
+        }
+
+        // Get form data
+        function getFormData() {
+            return {
+                full_name: document.getElementById('full_name').value,
+                phone: document.getElementById('phone').value,
+                date_of_birth: document.getElementById('date_of_birth').value,
+                gender: document.getElementById('gender').value,
+                bio: document.getElementById('bio').value
+            };
+        }
+
+        // Show loading
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+
+        // Hide loading
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+        // Show error message
+        function showError(message) {
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-danger alert-dismissible fade show';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.profile-card .card-body').insertBefore(alert, document.querySelector('.nav-tabs'));
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success alert-dismissible fade show';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.profile-card .card-body').insertBefore(alert, document.querySelector('.nav-tabs'));
+        }
+
+        // Fetch CSRF token
+        function fetchCSRFToken() {
+            return fetch('http://localhost/event%20booking/backend/utils/csrf_token.php')
+                .then(response => response.json())
+                .then(data => data.csrf_token);
+        }
+
+        // Profile form submission
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetchCSRFToken().then(csrfToken => {
+                formData.set('csrf_token', csrfToken);
+                
+                fetch('http://localhost/event%20booking/backend/users/update-profile.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    console.log('Profile update response status:', response.status);
+                    console.log('Profile update response headers:', response.headers);
+                    
+                    const contentType = response.headers.get('content-type');
+                    console.log('Profile update content type:', contentType);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return response.text();
+                })
+                .then(text => {
+                    console.log('Profile update raw response body:', text);
+                    
+                    // Clean response text to handle browser extension interference
+                    let cleanedText = text.trim();
+                    
+                    // Remove any HTML that might have been injected by browser extensions
+                    if (cleanedText.includes('<')) {
+                        // Try to extract JSON from HTML response
+                        const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+                        if (jsonMatch) {
+                            cleanedText = jsonMatch[0];
+                        } else {
+                            throw new Error('Invalid JSON response: Unable to extract JSON from HTML');
+                        }
+                    }
+                    
+                    console.log('Cleaned profile update text:', cleanedText);
+                    
+                    try {
+                        const data = JSON.parse(cleanedText);
+                        if (data.success) {
+                            showSuccess('Profile updated successfully!');
+                            originalFormData = getFormData();
+                            
+                            // Update avatar if changed
+                            if (data.avatar_url) {
+                                document.getElementById('avatarDisplay').innerHTML = `<img src="${data.avatar_url}" alt="Avatar" class="avatar">`;
+                            }
+                        } else {
+                            showError(data.message || 'Failed to update profile');
+                        }
+                    } catch (parseError) {
+                        console.error('JSON parse error:', parseError);
+                        console.error('Original text that failed to parse:', text);
+                        throw new Error('Invalid JSON response: ' + parseError.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Profile update error:', error);
+                    console.error('Profile update error stack:', error.stack);
+                    console.error('Profile update error name:', error.name);
+                    console.error('Profile update error message:', error.message);
+                    showError('Error updating profile');
+                });
+            });
+        });
+
+        // Preferences form submission
+        document.getElementById('preferencesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            
+            // Add preferences
+            const preferences = {};
+            preferences.email_notifications = document.getElementById('email_notifications').checked;
+            preferences.booking_reminders = document.getElementById('booking_reminders').checked;
+            preferences.marketing_emails = document.getElementById('marketing_emails').checked;
+            
+            formData.append('preferences', JSON.stringify(preferences));
+            
+            fetchCSRFToken().then(csrfToken => {
+                formData.set('csrf_token', csrfToken);
+                
+                fetch('http://localhost/event%20booking/backend/users/update-profile.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    console.log('Preferences update response status:', response.status);
+                    console.log('Preferences update response headers:', response.headers);
+                    
+                    const contentType = response.headers.get('content-type');
+                    console.log('Preferences update content type:', contentType);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return response.text();
+                })
+                .then(text => {
+                    console.log('Preferences update raw response body:', text);
+                    
+                    // Clean response text to handle browser extension interference
+                    let cleanedText = text.trim();
+                    
+                    // Remove any HTML that might have been injected by browser extensions
+                    if (cleanedText.includes('<')) {
+                        // Try to extract JSON from HTML response
+                        const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+                        if (jsonMatch) {
+                            cleanedText = jsonMatch[0];
+                        } else {
+                            throw new Error('Invalid JSON response: Unable to extract JSON from HTML');
+                        }
+                    }
+                    
+                    console.log('Cleaned preferences update text:', cleanedText);
+                    
+                    try {
+                        const data = JSON.parse(cleanedText);
+                        if (data.success) {
+                            showSuccess('Preferences updated successfully!');
+                        } else {
+                            showError(data.message || 'Failed to update preferences');
+                        }
+                    } catch (parseError) {
+                        console.error('JSON parse error:', parseError);
+                        console.error('Original text that failed to parse:', text);
+                        throw new Error('Invalid JSON response: ' + parseError.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Preferences update error:', error);
+                    console.error('Preferences update error stack:', error.stack);
+                    console.error('Preferences update error name:', error.name);
+                    console.error('Preferences update error message:', error.message);
+                    showError('Error updating preferences');
+                });
+            });
+        });
+
+        // Avatar upload
+        document.getElementById('avatarInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Check file size (2MB max)
+                if (file.size > 2097152) {
+                    showError('Avatar file must be less than 2MB');
+                    return;
+                }
+                
+                // Check file type
+                if (!file.type.match('image.*')) {
+                    showError('Please select an image file');
+                    return;
+                }
+                
+                // Preview avatar
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatarDisplay').innerHTML = `<img src="${e.target.result}" alt="Avatar Preview" class="avatar">`;
+                };
+                reader.readAsDataURL(file);
+                
+                // Auto-submit form to upload avatar
+                const formData = new FormData();
+                formData.append('avatar', file);
+                
+                fetchCSRFToken().then(csrfToken => {
+                    formData.set('csrf_token', csrfToken);
+                    
+                    fetch('http://localhost/event%20booking/backend/users/update-profile.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        console.log('Avatar upload response status:', response.status);
+                        console.log('Avatar upload response headers:', response.headers);
+                        
+                        const contentType = response.headers.get('content-type');
+                        console.log('Avatar upload content type:', contentType);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        return response.text();
+                    })
+                    .then(text => {
+                        console.log('Avatar upload raw response body:', text);
+                        
+                        // Clean response text to handle browser extension interference
+                        let cleanedText = text.trim();
+                        
+                        // Remove any HTML that might have been injected by browser extensions
+                        if (cleanedText.includes('<')) {
+                            // Try to extract JSON from HTML response
+                            const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+                            if (jsonMatch) {
+                                cleanedText = jsonMatch[0];
+                            } else {
+                                throw new Error('Invalid JSON response: Unable to extract JSON from HTML');
+                            }
+                        }
+                        
+                        console.log('Cleaned avatar upload text:', cleanedText);
+                        
+                        try {
+                            const data = JSON.parse(cleanedText);
+                            if (data.success) {
+                                showSuccess('Avatar updated successfully!');
+                            } else {
+                                showError(data.message || 'Failed to update avatar');
+                            }
+                        } catch (parseError) {
+                            console.error('JSON parse error:', parseError);
+                            console.error('Original text that failed to parse:', text);
+                            throw new Error('Invalid JSON response: ' + parseError.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Avatar upload error:', error);
+                        console.error('Avatar upload error stack:', error.stack);
+                        console.error('Avatar upload error name:', error.name);
+                        console.error('Avatar upload error message:', error.message);
+                        showError('Error updating avatar');
+                    });
+                });
+            }
+        });
+
+        // Cancel button
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to discard your changes?')) {
+                populateProfile(profileData);
+            }
+        });
+
+        // Check for unsaved changes before leaving
+        window.addEventListener('beforeunload', function(e) {
+            const currentData = getFormData();
+            const hasChanges = JSON.stringify(currentData) !== JSON.stringify(originalFormData);
+            
+            if (hasChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            }
+        });
+
+        // Load profile on page load
+        loadProfile();
+    </script>
+</body>
+</html>

@@ -1,13 +1,31 @@
 <?php
 require_once "../config/db.php";
+require_once "../utils/csrf.php";
+require_once "../utils/sanitizer.php";
+require_once "../utils/logger.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     die("Invalid request");
 }
 
-$full_name = trim($_POST['full_name']);
-$email     = trim($_POST['email']);
-$password  = $_POST['password'];
+// Validate CSRF token
+CSRFProtection::validateRequest();
+
+// Sanitize and validate input
+$rules = [
+    'full_name' => 'string',
+    'email' => 'email',
+    'password' => 'string'
+];
+$cleaned = InputSanitizer::cleanPost($rules);
+
+if ($cleaned['email'] === false) {
+    die("Invalid email format");
+}
+
+$full_name = $cleaned['full_name'];
+$email = $cleaned['email'];
+$password = $cleaned['password'];
 
 // Basic validation
 if (empty($full_name) || empty($email) || empty($password)) {
@@ -38,9 +56,20 @@ $stmt = $conn->prepare(
 $stmt->bind_param("sss", $full_name, $email, $hashed_password);
 
 if ($stmt->execute()) {
+    Logger::info("User registered", [
+        'user_id' => $stmt->insert_id,
+        'email' => $email,
+        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+    ]);
+    
     $base_url = "http://localhost/event%20booking/frontend/";
     header("Location: " . $base_url . "login.html");
     exit;
 } else {
+    Logger::error("Registration failed", [
+        'email' => $email,
+        'error' => $stmt->error
+    ]);
     die("Registration failed");
 }
+?>

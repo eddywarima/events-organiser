@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Booking Successful - Event Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .success-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .success-icon {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .success-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .success-message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .ticket-info {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 5px solid #007bff;
+        }
+        
+        .download-section {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+        
+        .download-btn {
+            background: white;
+            color: #007bff;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            color: #0056b3;
+        }
+        
+        .action-buttons {
+            margin-top: 30px;
+        }
+        
+        .secondary-btn {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .secondary-btn:hover {
+            background: white;
+            color: #007bff;
+        }
+        
+        .booking-details {
+            text-align: left;
+            margin: 20px 0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .detail-value {
+            color: #666;
+        }
+        
+        .price-highlight {
+            font-size: 24px;
+            color: #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        
+        <h1 class="success-title">Booking Successful!</h1>
+        <p class="success-message">Your event booking has been confirmed. A confirmation email has been sent to your registered email address.</p>
+        
+        <div class="ticket-info">
+            <h3><i class="fas fa-ticket-alt me-2"></i>Booking Details</h3>
+            <div class="booking-details" id="bookingDetails">
+                <div class="detail-row">
+                    <span class="detail-label">Booking ID:</span>
+                    <span class="detail-value" id="bookingId">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Event:</span>
+                    <span class="detail-value" id="eventTitle">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tickets:</span>
+                    <span class="detail-value" id="ticketCount">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Total Amount:</span>
+                    <span class="detail-value price-highlight" id="totalAmount">Loading...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="download-section">
+            <h3><i class="fas fa-print me-2"></i>Print Your Ticket</h3>
+            <p>Print your official ticket for easy access at the event venue</p>
+            
+            <div class="action-buttons">
+                <a href="#" class="download-btn" id="downloadPdfBtn" target="_blank">
+                    <i class="fas fa-print me-2"></i>Print Ticket
+                </a>
+                <a href="dashboard.html" class="secondary-btn">
+                    <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                </a>
+            </div>
+        </div>
+        
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Important:</strong> Please bring this PDF ticket (digital or printed) to the event venue for entry.
+        </div>
+    </div>
+
+    <script>
+        // Get booking details from URL parameters or session
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingId = urlParams.get('booking_id');
+            
+            if (bookingId) {
+                loadBookingDetails(bookingId);
+            } else {
+                // Try to get the latest booking from session
+                loadLatestBooking();
+            }
+        });
+        
+        function loadBookingDetails(bookingId) {
+            fetch(`http://localhost/event%20booking/backend/bookings/get-booking-details.php?id=${bookingId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayBookingDetails(data.booking);
+                        setupDownloadButton(data.booking.id);
+                    } else {
+                        showError('Unable to load booking details');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading booking details:', error);
+                    showError('Error loading booking details');
+                });
+        }
+        
+        function loadLatestBooking() {
+            fetch('http://localhost/event%20booking/backend/bookings/latest-booking.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayBookingDetails(data.booking);
+                        setupDownloadButton(data.booking.id);
+                    } else {
+                        showError('No recent booking found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading latest booking:', error);
+                    showError('Error loading booking information');
+                });
+        }
+        
+        function displayBookingDetails(booking) {
+            document.getElementById('bookingId').textContent = '#' + booking.id;
+            document.getElementById('eventTitle').textContent = booking.title;
+            document.getElementById('ticketCount').textContent = booking.tickets;
+            document.getElementById('totalAmount').textContent = 'KSh' + booking.total_amount;
+        }
+        
+        function setupDownloadButton(bookingId) {
+            const downloadBtn = document.getElementById('downloadPdfBtn');
+            downloadBtn.href = `http://localhost/event%20booking/backend/utils/print_ticket.php?booking_id=${bookingId}`;
+        }
+        
+        function showError(message) {
+            const container = document.querySelector('.success-container');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${message}`;
+            container.insertBefore(errorDiv, container.firstChild);
+            
+            // Hide loading states
+            document.getElementById('bookingId').textContent = 'N/A';
+            document.getElementById('eventTitle').textContent = 'N/A';
+            document.getElementById('ticketCount').textContent = 'N/A';
+            document.getElementById('totalAmount').textContent = 'N/A';
+            
+            // Disable download button
+            const downloadBtn = document.getElementById('downloadPdfBtn');
+            downloadBtn.style.opacity = '0.5';
+            downloadBtn.style.pointerEvents = 'none';
+        }
+    </script>
+</body>
+</html>

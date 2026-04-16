@@ -35,74 +35,195 @@
             opacity: 0.9;
             margin-bottom: 2rem;
         }
-        .event-card {
-            background: rgba(255, 255, 255, 0.95);
-            border: none;
+        .search-section {
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        .search-input {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 1.1rem;
             transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            border-color: #FFBF00;
+            background: white;
+            box-shadow: 0 0 20px rgba(255, 191, 0, 0.3);
+            outline: none;
+        }
+        .filter-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e9ecef;
+        }
+        .event-card {
+            background: rgba(255, 255, 255, 0.98);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
             overflow: hidden;
             margin-bottom: 2rem;
             height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border: 1px solid rgba(0, 123, 255, 0.1);
+        }
+        .event-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #007bff, #ffbf00);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .event-card:hover::before {
+            opacity: 1;
         }
         .event-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border-color: rgba(0, 123, 255, 0.3);
         }
         .event-card .card-img-top {
-            height: 200px;
+            height: 220px;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+        }
+        .event-card .card-img-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0,123,255,0.1), rgba(255,191,0,0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .event-card:hover .card-img-overlay {
+            opacity: 1;
         }
         .event-card:hover .card-img-top {
-            transform: scale(1.05);
+            transform: scale(1.08) rotate(1deg);
         }
         .card-title {
             color: #007bff;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 1.25rem;
             margin-bottom: 0.75rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 2.8rem;
         }
         .card-text {
-            color: #666;
+            color: #6c757d;
             font-size: 0.9rem;
-            line-height: 1.5;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 4.8rem;
         }
         .event-meta {
             display: flex;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
             font-size: 0.85rem;
+            background: rgba(0, 123, 255, 0.05);
+            padding: 0.5rem 0.75rem;
+            border-radius: 10px;
+            border-left: 3px solid #007bff;
+        }
+        .event-meta.location {
+            border-left-color: #ffbf00;
+            background: rgba(255, 191, 0, 0.05);
+        }
+        .event-meta.date {
+            border-left-color: #28a745;
+            background: rgba(40, 167, 69, 0.05);
         }
         .event-meta i {
             color: #ffbf00;
             margin-right: 0.5rem;
-            width: 16px;
+            width: 14px;
+        }
+        .event-meta span {
+            color: #495057;
+            font-weight: 500;
         }
         .price-badge {
-            background: linear-gradient(45deg, #007bff, #0056b3);
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            font-weight: 700;
+            display: inline-block;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .price-badge::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            transition: transform 0.6s;
+        }
+        .price-badge:hover::before {
+            transform: rotate(45deg) translateY(100%);
+        }
+        .tickets-available {
+            background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 20px;
+            font-size: 0.85rem;
             font-weight: 600;
-            display: inline-block;
-            margin-top: 1rem;
-        }
-        .tickets-available {
-            background: #28a745;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 500;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+            position: relative;
+            animation: pulse-green 2s infinite;
         }
         .tickets-low {
-            background: #ffc107;
-            color: #000;
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+            animation: pulse-orange 2s infinite;
         }
         .tickets-sold-out {
-            background: #dc3545;
+            background: linear-gradient(135deg, #dc3545, #c82333);
             color: white;
+            animation: none;
+        }
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3); }
+            50% { box-shadow: 0 3px 20px rgba(40, 167, 69, 0.6); }
+        }
+        @keyframes pulse-orange {
+            0%, 100% { box-shadow: 0 3px 10px rgba(255, 193, 7, 0.3); }
+            50% { box-shadow: 0 3px 20px rgba(255, 193, 7, 0.6); }
         }
         .btn-primary {
             background: linear-gradient(45deg, #007bff, #0056b3);
@@ -131,6 +252,33 @@
             margin-bottom: 3rem;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
+        .events-section {
+            background: transparent;
+        }
+        .events-section .container {
+            max-width: 1400px;
+        }
+        #events-container {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 1.5rem !important;
+        }
+        #events-container > div {
+            flex: 0 0 calc(33.333% - 1rem);
+            max-width: calc(33.333% - 1rem);
+        }
+        @media (max-width: 1200px) {
+            #events-container > div {
+                flex: 0 0 calc(50% - 0.75rem);
+                max-width: calc(50% - 0.75rem);
+            }
+        }
+        @media (max-width: 768px) {
+            #events-container > div {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
         .footer {
             background: rgba(0,0,0,0.8);
             color: white;
@@ -142,7 +290,94 @@
                 font-size: 2rem;
             }
             .event-card {
-                margin-bottom: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            .card-title {
+                font-size: 1rem;
+                margin-bottom: 0.4rem;
+            }
+            .card-text {
+                font-size: 0.8rem;
+                margin-bottom: 0.8rem;
+            }
+            .event-meta {
+                font-size: 0.75rem;
+                margin-bottom: 0.8rem;
+                flex-wrap: wrap;
+            }
+            .event-meta i {
+                width: 12px;
+            }
+            .price-badge {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.6rem;
+            }
+            .tickets-available,
+            .tickets-low {
+                font-size: 0.7rem;
+                padding: 0.25rem 0.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .event-card {
+                margin-bottom: 1rem;
+            }
+            .card-title {
+                font-size: 0.95rem;
+                line-height: 1.2;
+            }
+            .card-text {
+                font-size: 0.75rem;
+                line-height: 1.3;
+            }
+            .event-meta {
+                font-size: 0.7rem;
+                gap: 0.5rem;
+            }
+            .event-meta i {
+                width: 11px;
+            }
+            .price-badge {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+            .tickets-available,
+            .tickets-low {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.4rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .event-card {
+                margin-bottom: 0.8rem;
+            }
+            .card-title {
+                font-size: 0.9rem;
+                line-height: 1.1;
+            }
+            .card-text {
+                font-size: 0.7rem;
+                line-height: 1.2;
+            }
+            .event-meta {
+                font-size: 0.65rem;
+                gap: 0.4rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .event-meta i {
+                width: 10px;
+            }
+            .price-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.4rem;
+            }
+            .tickets-available,
+            .tickets-low {
+                font-size: 0.6rem;
+                padding: 0.15rem 0.3rem;
             }
         }
     </style>
@@ -218,23 +453,54 @@
     </div>
 
     <!-- Events Section -->
-    <div class="container" id="events">
-        <div class="text-center mb-5">
-            <h2 class="text-white">
-                <i class="fas fa-calendar-check me-2"></i>Upcoming Events
-            </h2>
-            <p class="text-white-50">Don't miss out on these exciting events</p>
-        </div>
+    <section class="events-section py-5" id="events">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="text-white display-4 fw-bold mb-3">
+                    <i class="fas fa-calendar-check me-3"></i>Upcoming Events
+                </h2>
+                <p class="text-white-50 lead">Discover and book tickets for the most exciting events near you</p>
+                <div class="row justify-content-center mt-4">
+                    <div class="col-auto">
+                        <div class="d-flex gap-3 justify-content-center">
+                            <div class="text-center">
+                                <i class="fas fa-music text-warning fa-2x mb-2"></i>
+                                <p class="text-white small mb-0">Live Music</p>
+                            </div>
+                            <div class="text-center">
+                                <i class="fas fa-theater-masks text-info fa-2x mb-2"></i>
+                                <p class="text-white small mb-0">Theater</p>
+                            </div>
+                            <div class="text-center">
+                                <i class="fas fa-football-ball text-success fa-2x mb-2"></i>
+                                <p class="text-white small mb-0">Sports</p>
+                            </div>
+                            <div class="text-center">
+                                <i class="fas fa-palette text-danger fa-2x mb-2"></i>
+                                <p class="text-white small mb-0">Arts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Loading Spinner -->
-        <div id="loading-spinner" class="loading-spinner">
-            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                <span class="visually-hidden">Loading...</span>
+            <div class="row g-4">
+                <div class="col-12">
+                    <!-- Loading Spinner -->
+                    <div id="loading-spinner" class="loading-spinner">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-white">Loading amazing events...</p>
+                        </div>
+                    </div>
+
+                    <div id="events-container" class="row g-4" style="display: none;"></div>
+                </div>
             </div>
         </div>
-
-        <div id="events-container" class="row" style="display: none;"></div>
-    </div>
+    </section>
 
     <!-- Footer -->
     <footer class="footer">
@@ -295,7 +561,7 @@
 
             events.forEach(event => {
                 const col = document.createElement('div');
-                col.className = 'col-lg-4 col-md-6';
+                col.className = 'col-xl-4 col-lg-4 col-md-6 col-sm-12';
 
                 // Determine ticket availability class
                 let ticketClass = 'tickets-available';
@@ -310,20 +576,26 @@
 
                 col.innerHTML = `
                     <div class="card event-card">
-                        ${event.image ? `<img src="http://localhost/event%20booking/backend/${event.image}" class="card-img-top" alt="${event.title}">` :
-                          `<div class="card-img-top bg-primary d-flex align-items-center justify-content-center text-white" style="height: 200px;">
-                            <i class="fas fa-calendar-alt fa-3x"></i>
-                          </div>`}
+                        <div class="position-relative">
+                            ${event.image ? `<img src="http://localhost/event%20booking/${event.image}" class="card-img-top" alt="${event.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">` :
+                              `<div class="card-img-top bg-primary d-flex align-items-center justify-content-center text-white" style="height: 220px;">
+                                <i class="fas fa-calendar-alt fa-3x"></i>
+                              </div>`}
+                            <div class="card-img-overlay"></div>
+                            <div class="card-img-top bg-primary d-flex align-items-center justify-content-center text-white" style="height: 220px; display: none;">
+                              <i class="fas fa-calendar-alt fa-3x"></i>
+                            </div>
+                        </div>
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title">${event.title}</h5>
-                            <p class="card-text flex-grow-1">${event.description.length > 100 ? event.description.substring(0, 100) + '...' : event.description}</p>
+                            <p class="card-text flex-grow-1">${event.description.length > 120 ? event.description.substring(0, 120) + '...' : event.description}</p>
 
-                            <div class="event-meta">
+                            <div class="event-meta location mb-2">
                                 <i class="fas fa-map-marker-alt"></i>
                                 <span>${event.location}</span>
                             </div>
 
-                            <div class="event-meta">
+                            <div class="event-meta date mb-3">
                                 <i class="fas fa-clock"></i>
                                 <span>${new Date(event.event_date + ' ' + event.event_time).toLocaleDateString('en-US', {
                                     weekday: 'short',
@@ -335,12 +607,12 @@
                                 })}</span>
                             </div>
 
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="price-badge">$${event.ticket_price}</span>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="price-badge">KSh${event.ticket_price}</span>
                                 <span class="${ticketClass}">${ticketText}</span>
                             </div>
 
-                            <a href="event.html?id=${event.id}" class="btn btn-primary mt-3 ${event.available_tickets === 0 ? 'disabled' : ''}">
+                            <a href="event.html?id=${event.id}" class="btn btn-primary mt-3 w-100 ${event.available_tickets === 0 ? 'disabled' : ''}">
                                 <i class="fas fa-ticket-alt me-2"></i>
                                 ${event.available_tickets === 0 ? 'Sold Out' : 'View & Book'}
                             </a>
@@ -352,33 +624,203 @@
         }
 
         // Search functionality
-        function filterEvents(searchTerm) {
-            if (!searchTerm) {
-                renderEvents(allEvents);
-                return;
+        let currentSearchTimeout;
+        let currentPage = 1;
+        let searchFilters = {
+            query: '',
+            location: '',
+            date_from: '',
+            date_to: '',
+            min_price: '',
+            max_price: '',
+            sort_by: 'event_date',
+            sort_order: 'ASC'
+        };
+
+        function performSearch(resetPage = true) {
+            if (resetPage) {
+                currentPage = 1;
             }
 
-            const filtered = allEvents.filter(event =>
-                event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                event.location.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            renderEvents(filtered);
+            showLoading();
+            
+            // Build search URL with parameters
+            const params = new URLSearchParams({
+                q: searchFilters.query,
+                location: searchFilters.location,
+                date_from: searchFilters.date_from,
+                date_to: searchFilters.date_to,
+                min_price: searchFilters.min_price,
+                max_price: searchFilters.max_price,
+                sort: searchFilters.sort_by,
+                order: searchFilters.sort_order,
+                page: currentPage,
+                limit: 12
+            });
+
+            fetch(`http://localhost/event%20booking/backend/events/search-events.php?${params}`)
+                .then(res => {
+                    console.log('Search events response status:', res.status);
+                    console.log('Search events response headers:', res.headers);
+                    
+                    const contentType = res.headers.get('content-type');
+                    console.log('Search events content type:', contentType);
+                    
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.text();
+                })
+                .then(text => {
+                    console.log('Search events raw response body:', text);
+                    
+                    // Clean response text to handle browser extension interference
+                    let cleanedText = text.trim();
+                    
+                    // Remove any HTML that might have been injected by browser extensions
+                    if (cleanedText.includes('<')) {
+                        // Try to extract JSON from HTML response
+                        const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+                        if (jsonMatch) {
+                            cleanedText = jsonMatch[0];
+                        } else {
+                            throw new Error('Invalid JSON response: Unable to extract JSON from HTML');
+                        }
+                    }
+                    
+                    console.log('Cleaned search events text:', cleanedText);
+                    
+                    try {
+                        const data = JSON.parse(cleanedText);
+                        hideLoading();
+                        allEvents = data.events;
+                        renderEvents(data.events);
+                        
+                        // Update filter options
+                        updateFilterOptions(data.filters);
+                        
+                        // Show search results info
+                        showSearchResults(data.pagination);
+                    } catch (parseError) {
+                        console.error('JSON parse error:', parseError);
+                        console.error('Original text that failed to parse:', text);
+                        throw new Error('Invalid JSON response: ' + parseError.message);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error searching events:', err);
+                    hideLoading();
+                    document.getElementById('events-container').innerHTML = "<div class='col-12'><div class='alert alert-danger text-center'><i class='fas fa-exclamation-triangle me-2'></i>Error searching events: " + err.message + "</div></div>";
+                });
+        }
+
+        function updateFilterOptions(filters) {
+            // Update location filter
+            const locationSelect = document.getElementById('locationFilter');
+            if (locationSelect && filters.locations) {
+                // Add default option
+                locationSelect.innerHTML = '<option value="">All Locations</option>';
+                filters.locations.forEach(location => {
+                    const option = document.createElement('option');
+                    option.value = location;
+                    option.textContent = location;
+                    locationSelect.appendChild(option);
+                });
+            }
+        }
+
+        function showSearchResults(pagination) {
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'col-12 mb-3';
+            resultsDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-white">Found <strong>${pagination.total}</strong> events</span>
+                        ${pagination.total > 0 ? `(Page ${pagination.current_page} of ${pagination.total_pages})` : ''}
+                    </div>
+                    <div class="d-flex gap-2">
+                        <select id="sortSelect" class="form-select form-select-sm" style="width: auto;">
+                            <option value="event_date-ASC" ${searchFilters.sort_by === 'event_date' && searchFilters.sort_order === 'ASC' ? 'selected' : ''}>Date (Earliest First)</option>
+                            <option value="event_date-DESC" ${searchFilters.sort_by === 'event_date' && searchFilters.sort_order === 'DESC' ? 'selected' : ''}>Date (Latest First)</option>
+                            <option value="title-ASC" ${searchFilters.sort_by === 'title' && searchFilters.sort_order === 'ASC' ? 'selected' : ''}>Title (A-Z)</option>
+                            <option value="title-DESC" ${searchFilters.sort_by === 'title' && searchFilters.sort_order === 'DESC' ? 'selected' : ''}>Title (Z-A)</option>
+                            <option value="ticket_price-ASC" ${searchFilters.sort_by === 'ticket_price' && searchFilters.sort_order === 'ASC' ? 'selected' : ''}>Price (Low to High)</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing results info
+            const existingResults = document.querySelector('.search-results-info');
+            if (existingResults) {
+                existingResults.remove();
+            }
+            
+            resultsDiv.classList.add('search-results-info');
+            const container = document.getElementById('events-container');
+            container.parentNode.insertBefore(resultsDiv, container);
+            
+            // Add sort change listener
+            document.getElementById('sortSelect').addEventListener('change', (e) => {
+                const [sort, order] = e.target.value.split('-');
+                searchFilters.sort_by = sort;
+                searchFilters.sort_order = order;
+                performSearch();
+            });
+        }
+
+        // Debounced search
+        function debounceSearch() {
+            clearTimeout(currentSearchTimeout);
+            currentSearchTimeout = setTimeout(() => {
+                performSearch();
+            }, 300);
         }
 
         // Load events
         showLoading();
         fetch('http://localhost/event%20booking/backend/events/fetch-events.php')
             .then(res => {
+                console.log('Fetch events response status:', res.status);
+                console.log('Fetch events response headers:', res.headers);
+                
+                const contentType = res.headers.get('content-type');
+                console.log('Fetch events content type:', contentType);
+                
                 if (!res.ok) {
                     throw new Error(`HTTP error! status: ${res.status}`);
                 }
-                return res.json();
+                return res.text();
             })
-            .then(events => {
-                allEvents = events;
-                hideLoading();
-                renderEvents(events);
+            .then(text => {
+                console.log('Fetch events raw response body:', text);
+                
+                // Clean response text to handle browser extension interference
+                let cleanedText = text.trim();
+                
+                // Remove any HTML that might have been injected by browser extensions
+                if (cleanedText.includes('<')) {
+                    // Try to extract JSON from HTML response
+                    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        cleanedText = jsonMatch[0];
+                    } else {
+                        throw new Error('Invalid JSON response: Unable to extract JSON from HTML');
+                    }
+                }
+                
+                console.log('Cleaned fetch events text:', cleanedText);
+                
+                try {
+                    const events = JSON.parse(cleanedText);
+                    allEvents = events;
+                    hideLoading();
+                    renderEvents(events);
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    console.error('Original text that failed to parse:', text);
+                    throw new Error('Invalid JSON response: ' + parseError.message);
+                }
             })
             .catch(err => {
                 console.error('Error loading events:', err);
@@ -388,12 +830,96 @@
 
         // Search event listeners
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            filterEvents(e.target.value);
+            searchFilters.query = e.target.value;
+            debounceSearch();
         });
 
         document.getElementById('searchBtn').addEventListener('click', () => {
-            const searchTerm = document.getElementById('searchInput').value;
-            filterEvents(searchTerm);
+            searchFilters.query = document.getElementById('searchInput').value;
+            performSearch();
+        });
+
+        // Add advanced filters (optional enhancement)
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add filter toggle button
+            const searchSection = document.querySelector('.search-section');
+            const filterToggle = document.createElement('div');
+            filterToggle.className = 'text-center mt-3';
+            filterToggle.innerHTML = `
+                <button class="btn btn-outline-light btn-sm" id="toggleFilters">
+                    <i class="fas fa-filter me-1"></i>Advanced Filters
+                </button>
+            `;
+            searchSection.appendChild(filterToggle);
+
+            // Add advanced filters section
+            const advancedFilters = document.createElement('div');
+            advancedFilters.className = 'filter-section mt-3';
+            advancedFilters.style.display = 'none';
+            advancedFilters.innerHTML = `
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Location</label>
+                        <input type="text" id="locationFilter" class="form-control" placeholder="Enter location">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Date From</label>
+                        <input type="date" id="dateFromFilter" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Date To</label>
+                        <input type="date" id="dateToFilter" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Max Price (KSh)</label>
+                        <input type="number" id="maxPriceFilter" class="form-control" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button class="btn btn-primary btn-sm" id="applyFilters">
+                        <i class="fas fa-check me-1"></i>Apply Filters
+                    </button>
+                    <button class="btn btn-outline-light btn-sm ms-2" id="clearFilters">
+                        <i class="fas fa-times me-1"></i>Clear Filters
+                    </button>
+                </div>
+            `;
+            searchSection.appendChild(advancedFilters);
+
+            // Toggle filters
+            document.getElementById('toggleFilters').addEventListener('click', () => {
+                const filters = document.querySelector('.filter-section');
+                filters.style.display = filters.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Apply filters
+            document.getElementById('applyFilters').addEventListener('click', () => {
+                searchFilters.location = document.getElementById('locationFilter').value;
+                searchFilters.date_from = document.getElementById('dateFromFilter').value;
+                searchFilters.date_to = document.getElementById('dateToFilter').value;
+                searchFilters.max_price = document.getElementById('maxPriceFilter').value;
+                performSearch();
+            });
+
+            // Clear filters
+            document.getElementById('clearFilters').addEventListener('click', () => {
+                document.getElementById('locationFilter').value = '';
+                document.getElementById('dateFromFilter').value = '';
+                document.getElementById('dateToFilter').value = '';
+                document.getElementById('maxPriceFilter').value = '';
+                
+                searchFilters = {
+                    query: document.getElementById('searchInput').value,
+                    location: '',
+                    date_from: '',
+                    date_to: '',
+                    min_price: '',
+                    max_price: '',
+                    sort_by: 'event_date',
+                    sort_order: 'ASC'
+                };
+                performSearch();
+            });
         });
 
         // Smooth scroll to events section

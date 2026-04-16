@@ -27,18 +27,19 @@
                         <p class="card-text"><strong>Location:</strong> <span id="location"></span></p>
                         <p class="card-text"><strong>Date & Time:</strong> <span id="datetime"></span></p>
                         <p class="card-text"><strong>Available Tickets:</strong> <span id="tickets"></span></p>
-                        <p class="card-text"><strong>Price:</strong> $<span id="price"></span></p>
+                        <p class="card-text"><strong>Price:</strong> KSh<span id="price"></span></p>
 
                         <h3 class="text-center text-amber mt-4">Book Tickets</h3>
                         <div id="login-required" class="alert alert-info text-center" style="display: none;">
                             Please <a href="login.html">login</a> to book tickets.
                         </div>
                         <form id="bookingForm" action="http://localhost/event%20booking/backend/bookings/book-ticket.php" method="POST">
+                            <input type="hidden" name="csrf_token" id="csrf_token">
                             <input type="hidden" name="event_id" id="event_id">
                             <div class="mb-3">
                                 <label for="tickets_input" class="form-label">Number of Tickets</label>
                                 <input type="number" class="form-control" name="tickets" id="tickets_input" value="1" min="1" required>
-                                <div class="form-text" id="price-display">Total: $<span id="total-price">0.00</span></div>
+                                <div class="form-text" id="price-display">Total: KSh<span id="total-price">0.00</span></div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Book Now</button>
                         </form>
@@ -57,13 +58,30 @@
         const urlParams = new URLSearchParams(window.location.search);
         const eventId = urlParams.get('id');
 
-        if (!eventId) {
-            document.querySelector('.card-body').innerHTML = '<p class="text-center text-danger">No event ID provided.</p>';
-        } else {
-            fetch(`http://localhost/event%20booking/backend/events/fetch-event.php?id=${eventId}`)
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! status: ${res.status}`);
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Fetch CSRF token first
+            try {
+                const csrfResponse = await fetch('http://localhost/event%20booking/backend/utils/csrf_token.php');
+                const csrfData = await csrfResponse.json();
+                document.getElementById('csrf_token').value = csrfData.csrf_token;
+                
+                // Then load event data
+                loadEvent();
+            } catch (error) {
+                console.error('Error fetching CSRF token:', error);
+                document.querySelector('.card-body').innerHTML = '<p class="text-center text-danger">Error loading security token. Please refresh the page.</p>';
+            }
+        });
+
+        async function loadEvent() {
+            if (!eventId) {
+                document.querySelector('.card-body').innerHTML = '<p class="text-center text-danger">No event ID provided.</p>';
+            } else {
+                fetch(`http://localhost/event%20booking/backend/events/fetch-event.php?id=${eventId}`)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error(`HTTP error! status: ${res.status}`);
                     }
                     return res.json();
                 })
@@ -76,11 +94,19 @@
                     const cardBody = document.querySelector('.card-body');
                     if (event.image) {
                         const img = document.createElement('img');
-                        img.src = `http://localhost/event%20booking/backend/${event.image}`;
+                        img.src = `http://localhost/event%20booking/${event.image}`;
                         img.className = 'card-img-top mb-3';
                         img.alt = event.title;
                         img.style.maxHeight = '300px';
                         img.style.objectFit = 'cover';
+                        img.onerror = function() {
+                            this.style.display = 'none';
+                            const placeholder = document.createElement('div');
+                            placeholder.className = 'card-img-top bg-primary d-flex align-items-center justify-content-center text-white mb-3';
+                            placeholder.style.height = '300px';
+                            placeholder.innerHTML = '<i class="fas fa-calendar-alt fa-3x"></i>';
+                            this.parentNode.insertBefore(placeholder, this);
+                        };
                         cardBody.insertBefore(img, cardBody.firstChild);
                     }
 
@@ -138,6 +164,7 @@
                     console.error('Error fetching event:', err);
                     document.querySelector('.card-body').innerHTML = '<div class="alert alert-danger text-center">Error loading event details: ' + err.message + '<br><a href="index.html" class="btn btn-secondary mt-3">Back to Events</a></div>';
                 });
+            }
         }
     </script>
 </body>

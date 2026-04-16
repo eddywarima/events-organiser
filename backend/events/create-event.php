@@ -1,6 +1,8 @@
 <?php
 require_once "../auth/auth_check.php";
 require_once "../config/db.php";
+require_once "../utils/csrf.php";
+require_once "../utils/sanitizer.php";
 
 // Only admin
 if ($_SESSION['role'] !== 'admin') {
@@ -11,14 +13,52 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("Invalid request");
 }
 
+// Validate CSRF token
+CSRFProtection::validateRequest();
+
+// Sanitize and validate input
+$rules = [
+    'title' => 'string',
+    'description' => 'text',
+    'location' => 'string',
+    'event_date' => 'date',
+    'event_time' => 'time',
+    'total_tickets' => 'int',
+    'ticket_price' => 'number'
+];
+$cleaned = InputSanitizer::cleanPost($rules);
+
+// Validate each field
+if ($cleaned['title'] === false || empty($cleaned['title'])) {
+    die("Invalid title");
+}
+if ($cleaned['description'] === false || empty($cleaned['description'])) {
+    die("Invalid description");
+}
+if ($cleaned['location'] === false || empty($cleaned['location'])) {
+    die("Invalid location");
+}
+if ($cleaned['event_date'] === false) {
+    die("Invalid date format");
+}
+if ($cleaned['event_time'] === false) {
+    die("Invalid time format");
+}
+if ($cleaned['total_tickets'] === false || $cleaned['total_tickets'] < 1) {
+    die("Invalid number of tickets");
+}
+if ($cleaned['ticket_price'] === false || $cleaned['ticket_price'] < 0) {
+    die("Invalid ticket price");
+}
+
 // Get form data
-$title = $_POST['title'];
-$description = $_POST['description'];
-$location = $_POST['location'];
-$event_date = $_POST['event_date'];
-$event_time = $_POST['event_time'];
-$total_tickets = intval($_POST['total_tickets']);
-$ticket_price = floatval($_POST['ticket_price']);
+$title = $cleaned['title'];
+$description = $cleaned['description'];
+$location = $cleaned['location'];
+$event_date = $cleaned['event_date'];
+$event_time = $cleaned['event_time'];
+$total_tickets = $cleaned['total_tickets'];
+$ticket_price = $cleaned['ticket_price'];
 $available_tickets = $total_tickets;
 
 // Validate event date
@@ -30,15 +70,16 @@ if (strtotime($event_date) < strtotime(date('Y-m-d'))) {
 $image_path = null;
 if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
     $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!in_array($_FILES['image']['type'], $allowed_types)) {
-        die("Invalid image type. Only JPG, PNG, GIF allowed.");
+    $max_size = 1048576; // 1MB
+
+    $cleaned_file = InputSanitizer::cleanFile($_FILES['image'], $allowed_types, $max_size);
+
+    if ($cleaned_file === false) {
+        die("Invalid image file. Only JPG, PNG, GIF allowed, max 1MB.");
     }
-    if ($_FILES['image']['size'] > 1048576) { // 1MB
-        die("Image too large. Max 1MB.");
-    }
-    $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-    $image_path = "../uploads/events/" . time() . "." . $ext;
-    move_uploaded_file($_FILES['image']['tmp_name'], $image_path);
+
+    $image_path = "uploads/events/" . $cleaned_file['name'];
+    move_uploaded_file($cleaned_file['tmp_name'], $image_path);
 }
 
 // Insert into DB

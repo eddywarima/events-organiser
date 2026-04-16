@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { 
+            background: linear-gradient(135deg, #007bff, #ffffff); 
+            min-height: 100vh; 
+            color: #333; 
+        }
+        .card { 
+            background-color: rgba(255, 255, 255, 0.9); 
+            border: 2px solid #007bff; 
+            margin-bottom: 20px;
+        }
+        .btn-primary { 
+            background-color: #007bff; 
+            border-color: #007bff; 
+        }
+        .text-amber { 
+            color: #FFBF00; 
+            font-weight: bold;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            margin-bottom: 15px;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        .activity-item {
+            padding: 10px;
+            border-left: 3px solid #007bff;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+        .period-selector {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-center text-amber mb-4">Analytics Dashboard</h2>
+                        
+                        <!-- Period Selector -->
+                        <div class="period-selector">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="period" class="form-label">Select Period:</label>
+                                    <select id="period" class="form-select">
+                                        <option value="7days">Last 7 Days</option>
+                                        <option value="30days" selected>Last 30 Days</option>
+                                        <option value="90days">Last 90 Days</option>
+                                        <option value="1year">Last Year</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <a href="admin-dashboard.html" class="btn btn-secondary mt-4">Back to Dashboard</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loading Indicator -->
+                        <div id="loading" class="loading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading analytics data...</p>
+                        </div>
+
+                        <!-- Analytics Content -->
+                        <div id="analytics-content" style="display: none;">
+                            <!-- Overview Statistics -->
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-number" id="total-users">-</div>
+                                        <div class="stat-label">Total Users</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-number" id="total-events">-</div>
+                                        <div class="stat-label">Total Events</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-number" id="total-bookings">-</div>
+                                        <div class="stat-label">Total Bookings</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-number" id="total-revenue">-</div>
+                                        <div class="stat-label">Total Revenue</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Charts Row -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Booking Trends</h5>
+                                            <div class="chart-container">
+                                                <canvas id="bookingChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">User Registration Trends</h5>
+                                            <div class="chart-container">
+                                                <canvas id="userChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Revenue and Status Charts -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Monthly Revenue</h5>
+                                            <div class="chart-container">
+                                                <canvas id="revenueChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Booking Status Distribution</h5>
+                                            <div class="chart-container">
+                                                <canvas id="statusChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Top Events and Recent Activity -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Top Events</h5>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Event</th>
+                                                            <th>Bookings</th>
+                                                            <th>Revenue</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="top-events-table">
+                                                        <!-- Populated by JavaScript -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Recent Activity</h5>
+                                            <div id="recent-activity">
+                                                <!-- Populated by JavaScript -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Stats -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">User Activity Summary</h5>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="stat-card">
+                                                        <div class="stat-number" id="users-with-bookings">-</div>
+                                                        <div class="stat-label">Users with Bookings</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="stat-card">
+                                                        <div class="stat-number" id="avg-bookings">-</div>
+                                                        <div class="stat-label">Avg Bookings/User</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-6">
+                                                    <div class="stat-card">
+                                                        <div class="stat-number" id="total-tickets">-</div>
+                                                        <div class="stat-label">Total Tickets Sold</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="stat-card">
+                                                        <div class="stat-number" id="avg-tickets">-</div>
+                                                        <div class="stat-label">Avg Tickets/Booking</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Popular Locations</h5>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Location</th>
+                                                            <th>Events</th>
+                                                            <th>Active</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="popular-locations-table">
+                                                        <!-- Populated by JavaScript -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let analyticsData = null;
+        let bookingChart = null;
+        let userChart = null;
+        let revenueChart = null;
+        let statusChart = null;
+
+        // Load analytics data
+        function loadAnalytics() {
+            const period = document.getElementById('period').value;
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('analytics-content').style.display = 'none';
+
+            fetch(`http://localhost/event%20booking/backend/admin/analytics.php?period=${period}`)
+                .then(response => response.json())
+                .then(data => {
+                    analyticsData = data;
+                    updateDashboard();
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('analytics-content').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error loading analytics:', error);
+                    document.getElementById('loading').innerHTML = '<div class="alert alert-danger">Error loading analytics data</div>';
+                });
+        }
+
+        // Update dashboard with data
+        function updateDashboard() {
+            if (!analyticsData) return;
+
+            // Update overview statistics
+            document.getElementById('total-users').textContent = analyticsData.overview.total_users.toLocaleString();
+            document.getElementById('total-events').textContent = analyticsData.overview.total_events.toLocaleString();
+            document.getElementById('total-bookings').textContent = analyticsData.overview.total_bookings.toLocaleString();
+            document.getElementById('total-revenue').textContent = 'ksh' + parseFloat(analyticsData.overview.total_revenue).toFixed(2);
+
+            // Update user activity
+            document.getElementById('users-with-bookings').textContent = analyticsData.user_activity.users_with_bookings.toLocaleString();
+            document.getElementById('avg-bookings').textContent = parseFloat(analyticsData.user_activity.avg_bookings_per_user).toFixed(1);
+            document.getElementById('total-tickets').textContent = analyticsData.user_activity.total_tickets_sold.toLocaleString();
+            document.getElementById('avg-tickets').textContent = parseFloat(analyticsData.user_activity.avg_tickets_per_booking).toFixed(1);
+
+            // Update charts
+            updateBookingChart();
+            updateUserChart();
+            updateRevenueChart();
+            updateStatusChart();
+
+            // Update tables
+            updateTopEventsTable();
+            updateRecentActivity();
+            updatePopularLocationsTable();
+        }
+
+        // Update booking trends chart
+        function updateBookingChart() {
+            const ctx = document.getElementById('bookingChart').getContext('2d');
+            
+            if (bookingChart) {
+                bookingChart.destroy();
+            }
+
+            bookingChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: analyticsData.booking_trends.map(item => item.date),
+                    datasets: [{
+                        label: 'Bookings',
+                        data: analyticsData.booking_trends.map(item => item.bookings),
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update user registration chart
+        function updateUserChart() {
+            const ctx = document.getElementById('userChart').getContext('2d');
+            
+            if (userChart) {
+                userChart.destroy();
+            }
+
+            userChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: analyticsData.user_trends.map(item => item.date),
+                    datasets: [{
+                        label: 'New Users',
+                        data: analyticsData.user_trends.map(item => item.users),
+                        backgroundColor: '#28a745',
+                        borderColor: '#28a745',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update revenue chart
+        function updateRevenueChart() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            
+            if (revenueChart) {
+                revenueChart.destroy();
+            }
+
+            revenueChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: analyticsData.monthly_revenue.map(item => item.month),
+                    datasets: [{
+                        label: 'Revenue',
+                        data: analyticsData.monthly_revenue.map(item => item.revenue),
+                        backgroundColor: '#FFBF00',
+                        borderColor: '#FFBF00',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'ksh' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update status chart
+        function updateStatusChart() {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            
+            if (statusChart) {
+                statusChart.destroy();
+            }
+
+            statusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Confirmed', 'Cancelled'],
+                    datasets: [{
+                        data: [
+                            analyticsData.booking_status.confirmed,
+                            analyticsData.booking_status.cancelled
+                        ],
+                        backgroundColor: ['#28a745', '#dc3545'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Update top events table
+        function updateTopEventsTable() {
+            const tbody = document.getElementById('top-events-table');
+            tbody.innerHTML = '';
+
+            analyticsData.top_events.slice(0, 5).forEach(event => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${event.title}</strong></td>
+                    <td>${event.bookings}</td>
+                    <td>ksh${event.revenue.toFixed(2)}</td>
+                `;
+            });
+        }
+
+        // Update recent activity
+        function updateRecentActivity() {
+            const container = document.getElementById('recent-activity');
+            container.innerHTML = '';
+
+            analyticsData.recent_activity.slice(0, 5).forEach(activity => {
+                const item = document.createElement('div');
+                item.className = 'activity-item';
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>${activity.user_name}</strong> booked 
+                            <strong>${activity.tickets}</strong> tickets for 
+                            <strong>${activity.event_title}</strong>
+                        </div>
+                        <small class="text-muted">${new Date(activity.date).toLocaleDateString()}</small>
+                    </div>
+                    <div class="text-muted small">Amount: ksh${activity.amount.toFixed(2)}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Update popular locations table
+        function updatePopularLocationsTable() {
+            const tbody = document.getElementById('popular-locations-table');
+            tbody.innerHTML = '';
+
+            analyticsData.popular_locations.slice(0, 5).forEach(location => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${location.location}</td>
+                    <td>${location.events}</td>
+                    <td><span class="badge bg-success">${location.active}</span></td>
+                `;
+            });
+        }
+
+        // Event listeners
+        document.getElementById('period').addEventListener('change', loadAnalytics);
+
+        // Initial load
+        loadAnalytics();
+    </script>
+</body>
+</html>

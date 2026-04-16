@@ -13,7 +13,10 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 
 // Check connection
 if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
+    header('Content-Type: application/json');
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Database connection failed. Please contact administrator.']);
+    exit();
 }
 
 // Set charset for security & performance
